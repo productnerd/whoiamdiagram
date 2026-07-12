@@ -154,7 +154,8 @@ const nodes = [
 ];
 const byId = new Map(nodes.map(n => [n.id, n]));
 const links = [
-  ...GROUPS.map(g => ({s:"good life", t:g.id, type:"spine"})),
+  ...GROUPS.filter(g => g.id !== "ideals").map(g => ({s:"good life", t:g.id, type:"spine"})),
+  {s:"character", t:"ideals", type:"spine"},
   ...BRANCH.map(([s,t]) => ({s, t, type:"branch"})),
   ...CROSS.map(([s,t]) => ({s, t, type:"cross"}))
 ].map(l => ({...l, source:byId.get(l.s), target:byId.get(l.t)}));
