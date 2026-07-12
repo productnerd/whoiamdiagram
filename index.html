@@ -56,7 +56,7 @@
 
 <header>
   <h1>The <em>Good Life</em>, fair copy</h1>
-  <span class="sub">seven branches</span>
+  <span class="sub">six branches</span>
   <span class="spacer"></span>
   <div class="controls">
     <button id="cross" aria-pressed="true">cross-links</button>
@@ -87,7 +87,6 @@ const GROUPS = [
   {id:"character", label:"character",   note:"How you carry yourself while aiming. The Greek words live here."},
   {id:"people",    label:"people",      note:"The good life is not a solo sport."},
   {id:"mind",      label:"mind",        note:"Thinking as a way of leaving yourself behind."},
-  {id:"making",    label:"making",      note:"Building as a way of putting yourself into the world."},
   {id:"body",      label:"body & wild", note:"Depth, altitude, weather, effort. The parts that leave a mark on you."}
 ];
 
@@ -103,7 +102,7 @@ const LEAVES = [
   {id:"human connection", g:"people"},
   {id:"things I love with people I love", g:"people"},
   {id:"intellectual life", g:"mind"}, {id:"self-transcendence", g:"mind"},
-  {id:"life of creation", g:"making"}, {id:"self-expression", g:"making"},
+  {id:"life of creation", g:"work"}, {id:"self-expression", g:"work"},
   {id:"nature & wildness", g:"body"}, {id:"athleticism", g:"body"},
   {id:"adventure & new experiences", g:"body"},
   {id:"education", g:"work"}, {id:"life skills", g:"work"}, {id:"game design", g:"work"},
@@ -116,7 +115,7 @@ const BRANCH = [
   ["character","arete"],["character","sophrosyne"],["character","philotimo"],["character","meraki"],["character","soul"],
   ["people","family, friends & community"],["people","human connection"],["people","things I love with people I love"],
   ["mind","intellectual life"],["intellectual life","self-transcendence"],
-  ["making","life of creation"],["life of creation","self-expression"],
+  ["work","life of creation"],["work","self-expression"],
   ["body","nature & wildness"],["body","athleticism"],["body","adventure & new experiences"],
   ["work","education"],["education","life skills"],["education","edtech"],["education","game design"],
   ["game design","board games"],["edtech","humane, ethical entrepreneurship"],
@@ -136,6 +135,7 @@ const CROSS = [
   ["soul","human connection"],
   ["self-transcendence","nature & wildness"],
   ["self-expression","product"],
+  ["life of creation","ideals"],["self-expression","ideals"],
   ["life of creation","product"],
   ["human connection","F&B"],
   ["things I love with people I love","board games"],
