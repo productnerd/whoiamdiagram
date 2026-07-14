@@ -1,83 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Good Life, fair copy</title>
+<title>M's Life Dashboard</title>
 <style>
   :root{
     --paper:#e8e6df; --ink:#2f3f96; --ink-deep:#1b2566;
     --graphite:#6f6d66; --graphite-soft:#9b9992; --red:#a8232c; --rule:#c5c2b8;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--paper);color:var(--ink-deep);
+  html,body{margin:0;height:100%}
+  body{
+    font-family:Tahoma,"Segoe UI",Verdana,Geneva,sans-serif;
+    overflow:hidden;color:#111;
+  }
+
+  /* ---------------- desktop + Bliss background ---------------- */
+  .desktop{position:fixed;inset:0;overflow:hidden}
+  .bliss{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+
+  /* desktop icons */
+  .icons{position:absolute;top:18px;left:14px;z-index:1;display:flex;flex-direction:column;gap:22px}
+  .icon{width:88px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+    padding:6px 4px;border:1px solid transparent;border-radius:3px}
+  .icon:hover{background:rgba(255,255,255,.16)}
+  .icon:focus-visible,.icon.sel{background:rgba(11,84,201,.45);border-color:rgba(255,255,255,.35);outline:none}
+  .icon .glyph{width:44px;height:44px;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.35))}
+  .icon .label{font-size:12px;color:#fff;text-align:center;line-height:1.15;
+    text-shadow:0 1px 3px rgba(0,0,0,.75);letter-spacing:.01em}
+
+  /* ---------------- XP window ---------------- */
+  .window{position:absolute;left:118px;right:22px;top:26px;bottom:54px;z-index:2;
+    display:flex;flex-direction:column;min-height:0;
+    background:#ece9d8;border:3px solid #0a54c9;border-top:none;border-radius:8px 8px 0 0;
+    box-shadow:0 14px 40px rgba(0,0,0,.4)}
+  .window.max{left:0;right:0;top:0;bottom:40px;border-radius:0;border-left:none;border-right:none}
+  .window.hidden{display:none}
+  @media (max-width:720px){ .window{left:10px;right:10px} .icons{display:none} }
+
+  .titlebar{height:30px;display:flex;align-items:center;gap:7px;padding:0 5px 0 8px;
+    border-radius:5px 5px 0 0;color:#fff;font-weight:700;font-size:13px;
+    text-shadow:0 1px 2px rgba(0,0,0,.45);
+    background:linear-gradient(180deg,#3d95ff 0%,#166fe6 9%,#0a5cdb 45%,#0a55d3 82%,#0847c9 100%)}
+  .window.max .titlebar{border-radius:0}
+  .titlebar .tbico{width:16px;height:16px;flex:0 0 auto}
+  .titlebar .tbtitle{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .winbtns{display:flex;gap:3px}
+  .winbtn{width:22px;height:20px;border:1px solid rgba(255,255,255,.65);border-radius:3px;
+    background:linear-gradient(180deg,#4a9bff,#0a56d0);color:#fff;font-size:12px;font-weight:700;
+    line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    text-shadow:0 1px 1px rgba(0,0,0,.4);padding:0}
+  .winbtn:hover{filter:brightness(1.12)}
+  .winbtn.close{background:linear-gradient(180deg,#f08a6c,#d23b1e)}
+
+  /* tab strip */
+  .tabbar{display:flex;gap:3px;padding:7px 8px 0;background:#ece9d8;
+    border-bottom:1px solid #9a9784}
+  .tab{padding:6px 18px;font-size:12px;font-weight:600;color:#3a3a2f;cursor:pointer;
+    background:#d7d2be;border:1px solid #a9a58e;border-bottom:none;border-radius:6px 6px 0 0;
+    position:relative;top:1px}
+  .tab:hover{background:#e2ddca}
+  .tab.active{background:#fbf9f1;color:#111;padding-bottom:7px;box-shadow:0 -1px 0 #fbf9f1}
+
+  .winbody{flex:1;min-height:0;display:flex;background:#ece9d8}
+  .panel{display:none;flex:1;min-height:0}
+  .panel--fill.active{display:flex;flex-direction:column}
+  .panel--scroll.active{display:block;overflow:auto}
+
+  /* ---------------- taskbar ---------------- */
+  .taskbar{position:absolute;left:0;right:0;bottom:0;height:40px;z-index:5;display:flex;
+    align-items:center;color:#fff;
+    background:linear-gradient(180deg,#3a8bf0 0%,#2071e4 8%,#2a7de8 50%,#1a63d6 92%,#154fbf 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+  .start{height:100%;display:flex;align-items:center;gap:8px;padding:0 20px 0 12px;border:none;
+    color:#fff;font-style:italic;font-weight:700;font-size:16px;cursor:pointer;
+    text-shadow:0 1px 2px rgba(0,0,0,.4);border-radius:0 12px 12px 0;
+    background:linear-gradient(180deg,#59d15a 0%,#43b543 12%,#2e9e2f 55%,#238b24 92%,#1c7d1e 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+  .start:hover{filter:brightness(1.06)}
+  .start .flag{width:18px;height:18px;border-radius:3px;
+    background:conic-gradient(from 90deg at 50% 50%,#f35325 0 25%,#81bc06 0 50%,#05a6f0 0 75%,#ffba08 0)}
+  .tasks{display:flex;gap:5px;padding:0 8px;flex:1;overflow:hidden}
+  .taskitem{height:26px;display:flex;align-items:center;gap:7px;padding:0 12px;max-width:190px;
+    color:#fff;font-size:12px;cursor:pointer;border-radius:3px;border:1px solid rgba(0,0,0,.15);
+    background:linear-gradient(180deg,#3f8ef2,#1f66d8);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+  .taskitem.active{background:linear-gradient(180deg,#1857bf,#2a72e0);
+    box-shadow:inset 1px 1px 3px rgba(0,0,0,.45)}
+  .taskitem .g{width:14px;height:14px;flex:0 0 auto}
+  .clock{margin-left:auto;height:100%;display:flex;flex-direction:column;justify-content:center;
+    align-items:center;padding:0 16px;font-size:12px;line-height:1.15;
+    background:linear-gradient(180deg,#2a95e0,#1272c9);box-shadow:inset 1px 0 0 rgba(255,255,255,.35)}
+  .clock .d{font-size:10px;opacity:.9}
+
+  /* start menu */
+  .startmenu{position:absolute;left:0;bottom:40px;z-index:6;width:250px;display:none;
+    border:2px solid #0a54c9;border-bottom:none;border-radius:8px 8px 0 0;overflow:hidden;
+    box-shadow:0 -8px 30px rgba(0,0,0,.4)}
+  .startmenu.open{display:block}
+  .startmenu .sm-head{background:linear-gradient(180deg,#2a7de8,#0a55d3);color:#fff;
+    padding:12px 14px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+  .startmenu .sm-body{background:#fff;padding:6px}
+  .sm-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:4px;cursor:pointer;
+    font-size:13px;color:#1a1a1a}
+  .sm-item:hover{background:#2a7de8;color:#fff}
+  .sm-item .g{width:22px;height:22px;flex:0 0 auto}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* ================= WIDGET 1: the diagram (scoped) ================= */
+  .diagram-app{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;
+    background:var(--paper);color:var(--ink-deep);
     font-family:"Inter","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
-  body{display:flex;flex-direction:column;overflow:hidden}
-  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  .diagram-app header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
     padding:16px 24px 12px;border-bottom:1px solid var(--rule);z-index:3}
-  h1{margin:0;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  .diagram-app h1{margin:0;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
     font-weight:400;font-size:20px}
-  h1 em{font-style:italic;color:var(--red)}
-  .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
-  .spacer{flex:1}
-  .controls{display:flex;gap:6px;flex-wrap:wrap}
-  button{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  .diagram-app h1 em{font-style:italic;color:var(--red)}
+  .diagram-app .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
+  .diagram-app .spacer{flex:1}
+  .diagram-app .controls{display:flex;gap:6px;flex-wrap:wrap}
+  .diagram-app .controls button{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
     padding:6px 11px;border:1px solid var(--rule);background:transparent;color:var(--graphite);
     border-radius:999px;cursor:pointer;transition:.15s}
-  button:hover{border-color:var(--graphite)}
-  button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
-  button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-  .stage{flex:1;position:relative;min-height:0}
-  svg#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
-  svg#map.dragging{cursor:grabbing}
-  .node{cursor:pointer}
-  .node text{pointer-events:none;paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
-  .ring{fill:rgba(232,230,223,.8)}
-  .faded{opacity:.1}
-  .gone{display:none}
-  aside{position:absolute;right:20px;bottom:20px;width:280px;max-width:calc(100% - 40px);
+  .diagram-app .controls button:hover{border-color:var(--graphite)}
+  .diagram-app .controls button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+  .diagram-app .controls button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+  .diagram-app .stage{flex:1;position:relative;min-height:0}
+  .diagram-app svg#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+  .diagram-app svg#map.dragging{cursor:grabbing}
+  .diagram-app .node{cursor:pointer}
+  .diagram-app .node text{pointer-events:none;paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+  .diagram-app .ring{fill:rgba(232,230,223,.8)}
+  .diagram-app .faded{opacity:.1}
+  .diagram-app .gone{display:none}
+  .diagram-app aside{position:absolute;right:20px;bottom:20px;width:280px;max-width:calc(100% - 40px);
     background:rgba(238,236,230,.95);border:1px solid var(--rule);padding:16px 18px 18px;
     opacity:0;transform:translateY(6px);transition:.18s;pointer-events:none}
-  aside.on{opacity:1;transform:none;pointer-events:auto}
-  aside h2{margin:0 0 2px;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  .diagram-app aside.on{opacity:1;transform:none;pointer-events:auto}
+  .diagram-app aside h2{margin:0 0 2px;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
     font-weight:400;font-size:19px}
-  aside .greek{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  .diagram-app aside .greek{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
     font-style:italic;font-size:14px;color:var(--graphite);margin:0 0 8px}
-  aside p.note{margin:0 0 10px;font-size:13px;line-height:1.5}
-  aside h3{margin:12px 0 6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
-  aside ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:5px}
-  aside li{font-size:12px;border:1px solid var(--rule);padding:3px 8px;border-radius:999px;cursor:pointer}
-  aside li:hover{border-color:var(--ink);color:var(--ink)}
-  aside li.cross{border-style:dashed}
-  .close{position:absolute;top:8px;right:10px;border:0;padding:4px;font-size:14px;color:var(--graphite)}
-  .hint{position:absolute;left:24px;bottom:22px;font-size:11px;color:var(--graphite-soft);
+  .diagram-app aside p.note{margin:0 0 10px;font-size:13px;line-height:1.5}
+  .diagram-app aside h3{margin:12px 0 6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
+  .diagram-app aside ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:5px}
+  .diagram-app aside li{font-size:12px;border:1px solid var(--rule);padding:3px 8px;border-radius:999px;cursor:pointer}
+  .diagram-app aside li:hover{border-color:var(--ink);color:var(--ink)}
+  .diagram-app aside li.cross{border-style:dashed}
+  .diagram-app .close{position:absolute;top:8px;right:10px;border:0;background:transparent;padding:4px;font-size:14px;color:var(--graphite);cursor:pointer}
+  .diagram-app .hint{position:absolute;left:24px;bottom:22px;font-size:11px;color:var(--graphite-soft);
     max-width:210px;line-height:1.7}
-  @media (max-width:640px){ header{padding:14px 16px 10px} .hint{display:none}
-    aside{right:12px;left:12px;bottom:12px;width:auto} }
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:640px){ .diagram-app header{padding:14px 16px 10px} .diagram-app .hint{display:none}
+    .diagram-app aside{right:12px;left:12px;bottom:12px;width:auto} }
+
+  /* ================= WIDGET 2: the annual planner (scoped) ================= */
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=DM+Sans:wght@400;500&display=swap');
+  .planner-app{min-height:100%;background:#F4EEDD;padding:36px 24px 48px;color:#1F1C13;
+    font-family:"DM Sans",-apple-system,system-ui,sans-serif}
+  .planner-app .wrap{max-width:1040px;margin:0 auto}
+  .planner-app .head{display:flex;justify-content:space-between;align-items:flex-end;
+    margin-bottom:36px;flex-wrap:wrap;gap:16px}
+  .planner-app .eyebrow{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:13px;
+    letter-spacing:.08em;text-transform:uppercase;color:#8A7C55;margin-bottom:4px}
+  .planner-app h1{font-family:"Fraunces",Georgia,serif;font-size:52px;font-weight:400;font-style:italic;
+    margin:0;letter-spacing:-.02em;line-height:1;color:#1F1C13}
+  .planner-app .lede{margin:10px 0 0;font-size:14px;color:#6A5D40;max-width:500px;line-height:1.5}
+  .planner-app .btns{display:flex;gap:10px}
+  .planner-btn{font-family:inherit;font-size:13px;font-weight:500;padding:7px 14px;background:transparent;
+    border:1px solid #BFAE7F;color:#4A402A;border-radius:999px;cursor:pointer;letter-spacing:.01em;
+    transition:background 120ms,color 120ms}
+  .planner-btn:hover{background:#4A402A;color:#F4EEDD}
+  .planner-app .card{background:#FBF6E8;border:1px solid #D3C6A0;border-radius:10px;
+    padding:22px 20px 24px;user-select:none;overflow-x:auto}
+  .planner-app .card-inner{min-width:720px}
+  .planner-app .months,.planner-app .feast,.planner-app .catrow{display:grid;gap:2px}
+  .planner-app .months{margin-bottom:10px;font-family:"Fraunces",Georgia,serif;font-style:italic;
+    font-size:13px;color:#8A7C55}
+  .planner-app .month{text-align:center;padding:2px 2px 6px}
+  .planner-app .month.divide{border-left:1px solid rgba(138,124,85,.18)}
+  .planner-app .feast{margin-bottom:10px;align-items:center}
+  .planner-app .rlabel{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:12px;
+    color:#8A7C55;padding-right:14px;text-align:right}
+  .planner-app .feast-cell{height:18px;display:flex;align-items:center;justify-content:center;color:#9B7A3A}
+  .planner-app .catrow{margin-bottom:5px;align-items:center}
+  .planner-app .catlabel{display:flex;align-items:center;gap:10px;padding-right:14px;font-size:14px;font-weight:500}
+  .planner-app .swatch{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+  .planner-app .catname{flex:1}
+  .planner-app .catcount{font-family:"Fraunces",Georgia,serif;font-style:italic;
+    font-variant-numeric:tabular-nums;color:#8A7C55;font-weight:400;font-size:14px}
+  .planner-app .cell{height:28px;border-radius:2px;cursor:pointer;transition:background 90ms,transform 120ms}
+  .planner-app .cell:hover{transform:scaleY(1.15)}
+  .planner-app .foot{margin-top:28px;display:flex;justify-content:space-between;align-items:baseline;
+    flex-wrap:wrap;gap:12px;padding-top:20px;border-top:1px solid rgba(138,124,85,.25)}
+  .planner-app .assigned{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:20px;color:#4A402A}
+  .planner-app .assigned .dim{color:#8A7C55}
+  .planner-app .unassigned{font-size:14px;color:#B8A66D;margin-left:10px}
+  .planner-app .legend{display:flex;gap:22px;font-size:13px;color:#6A5D40;flex-wrap:wrap}
+  .planner-app .legend .item{display:inline-flex;align-items:center;gap:6px}
+  .planner-app .legend .sw{width:8px;height:8px;border-radius:1px}
+  .planner-app .legend .lbl{font-weight:500}
+  .planner-app .legend .cnt{font-variant-numeric:tabular-nums;color:#8A7C55}
 </style>
+</head>
+<body>
+<div class="desktop">
 
-<header>
-  <h1>The <em>Good Life</em>, fair copy</h1>
-  <span class="sub">six branches</span>
-  <span class="spacer"></span>
-  <div class="controls">
-    <button id="cross" aria-pressed="true">cross-links</button>
-    <button id="collapse">collapse all</button>
-    <button id="reset">reset</button>
+  <!-- Bliss-style background (original artwork, not the Microsoft photo) -->
+  <svg class="bliss" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3d84dc"/>
+        <stop offset=".42" stop-color="#6fb0ec"/>
+        <stop offset=".78" stop-color="#c2e2f6"/>
+        <stop offset="1" stop-color="#eef6fc"/>
+      </linearGradient>
+      <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8ec63f"/>
+        <stop offset=".45" stop-color="#5ea329"/>
+        <stop offset="1" stop-color="#356f14"/>
+      </linearGradient>
+      <filter id="soft" x="-30%" y="-60%" width="160%" height="260%">
+        <feGaussianBlur stdDeviation="10"/>
+      </filter>
+    </defs>
+    <rect width="1000" height="700" fill="url(#sky)"/>
+    <g fill="#ffffff" filter="url(#soft)">
+      <ellipse cx="175" cy="118" rx="120" ry="32" opacity=".85"/>
+      <ellipse cx="255" cy="150" rx="150" ry="28" opacity=".8"/>
+      <ellipse cx="770" cy="86" rx="140" ry="30" opacity=".85"/>
+      <ellipse cx="850" cy="126" rx="115" ry="24" opacity=".8"/>
+      <ellipse cx="520" cy="205" rx="95" ry="17" opacity=".55"/>
+    </g>
+    <path d="M0,468 C170,402 330,402 470,452 C650,516 820,466 1000,438 L1000,700 L0,700 Z" fill="url(#hill)"/>
+    <path d="M0,470 C170,404 330,404 470,454 C650,518 820,468 1000,440" fill="none" stroke="#cdea86" stroke-width="5" opacity=".45"/>
+  </svg>
+
+  <!-- desktop icons -->
+  <div class="icons">
+    <button class="icon" data-open="whoami">
+      <svg class="glyph" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r="6" fill="#a8232c"/>
+        <g stroke="#1b2566" stroke-width="2"><line x1="24" y1="24" x2="9" y2="11"/><line x1="24" y1="24" x2="40" y2="12"/><line x1="24" y1="24" x2="10" y2="39"/><line x1="24" y1="24" x2="39" y2="38"/></g>
+        <circle cx="9" cy="11" r="4.5" fill="#2f3f96"/><circle cx="40" cy="12" r="4.5" fill="#2f3f96"/>
+        <circle cx="10" cy="39" r="4.5" fill="#2f3f96"/><circle cx="39" cy="38" r="4.5" fill="#2f3f96"/>
+      </svg>
+      <span class="label">Who I Am</span>
+    </button>
+    <button class="icon" data-open="theyear">
+      <svg class="glyph" viewBox="0 0 48 48">
+        <rect x="6" y="9" width="36" height="32" rx="3" fill="#fbf6e8" stroke="#4a402a" stroke-width="2"/>
+        <rect x="6" y="9" width="36" height="9" rx="3" fill="#d85a30"/>
+        <line x1="15" y1="6" x2="15" y2="13" stroke="#4a402a" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="33" y1="6" x2="33" y2="13" stroke="#4a402a" stroke-width="2.5" stroke-linecap="round"/>
+        <g fill="#1d9e75"><rect x="11" y="23" width="5" height="4"/><rect x="21" y="23" width="5" height="4"/></g>
+        <g fill="#378add"><rect x="31" y="23" width="5" height="4"/><rect x="11" y="31" width="5" height="4"/></g>
+        <g fill="#7f77dd"><rect x="21" y="31" width="5" height="4"/><rect x="31" y="31" width="5" height="4"/></g>
+      </svg>
+      <span class="label">The Year</span>
+    </button>
   </div>
-</header>
 
-<div class="stage">
-  <svg id="map"></svg>
-  <div class="hint">Click a branch to fold or unfold it. Click any node to trace what it touches. Drag to move, scroll to zoom.</div>
-  <aside id="panel">
-    <button class="close" id="close" aria-label="Close">✕</button>
-    <h2 id="p-title"></h2>
-    <p class="greek" id="p-greek"></p>
-    <p class="note" id="p-note"></p>
-    <div id="p-body"></div>
-  </aside>
+  <!-- the application window -->
+  <div class="window" id="window">
+    <div class="titlebar">
+      <svg class="tbico" viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="11" rx="1.5" fill="#fff" opacity=".9"/><rect x="2.5" y="3.5" width="11" height="8" fill="#2a7de8"/></svg>
+      <span class="tbtitle">M's Life Dashboard</span>
+      <div class="winbtns">
+        <button class="winbtn" id="btn-min" title="Minimize">–</button>
+        <button class="winbtn" id="btn-max" title="Maximize">▢</button>
+        <button class="winbtn close" id="btn-close" title="Close">✕</button>
+      </div>
+    </div>
+
+    <div class="tabbar" id="tabbar">
+      <div class="tab active" data-tab="whoami">Who I Am</div>
+      <div class="tab" data-tab="theyear">The Year</div>
+    </div>
+
+    <div class="winbody">
+      <!-- WIDGET 1 -->
+      <section class="panel panel--fill active" data-panel="whoami">
+        <div class="diagram-app">
+          <header>
+            <h1>The <em>Good Life</em>, fair copy</h1>
+            <span class="sub">six branches</span>
+            <span class="spacer"></span>
+            <div class="controls">
+              <button id="cross" aria-pressed="true">cross-links</button>
+              <button id="collapse">collapse all</button>
+              <button id="reset">reset</button>
+            </div>
+          </header>
+          <div class="stage">
+            <svg id="map"></svg>
+            <div class="hint">Click a branch to fold or unfold it. Click any node to trace what it touches. Drag to move, scroll to zoom.</div>
+            <aside id="panel">
+              <button class="close" id="close" aria-label="Close">✕</button>
+              <h2 id="p-title"></h2>
+              <p class="greek" id="p-greek"></p>
+              <p class="note" id="p-note"></p>
+              <div id="p-body"></div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- WIDGET 2 -->
+      <section class="panel panel--scroll" data-panel="theyear">
+        <div class="planner-app"><div class="wrap" id="planner-root"></div></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- start menu -->
+  <div class="startmenu" id="startmenu">
+    <div class="sm-head">M's Life Dashboard</div>
+    <div class="sm-body">
+      <div class="sm-item" data-open="whoami">
+        <svg class="g" viewBox="0 0 48 48"><circle cx="24" cy="24" r="7" fill="#a8232c"/><circle cx="9" cy="11" r="5" fill="#2f3f96"/><circle cx="40" cy="12" r="5" fill="#2f3f96"/><circle cx="10" cy="39" r="5" fill="#2f3f96"/></svg>
+        <span>Who I Am — the good-life map</span>
+      </div>
+      <div class="sm-item" data-open="theyear">
+        <svg class="g" viewBox="0 0 48 48"><rect x="6" y="9" width="36" height="32" rx="3" fill="#fbf6e8" stroke="#4a402a" stroke-width="2"/><rect x="6" y="9" width="36" height="9" rx="3" fill="#d85a30"/></svg>
+        <span>The Year — travel planner</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- taskbar -->
+  <div class="taskbar">
+    <button class="start" id="start"><span class="flag"></span>start</button>
+    <div class="tasks" id="tasks"></div>
+    <div class="clock"><span id="clk-time"></span><span class="d" id="clk-date"></span></div>
+  </div>
+
 </div>
 
+<!-- =============== shell controller =============== -->
 <script>
+(function(){
+  const WIDGETS = [
+    { id:"whoami",  label:"Who I Am" },
+    { id:"theyear", label:"The Year" },
+  ];
+  const win = document.getElementById("window");
+  const tabbar = document.getElementById("tabbar");
+  const tabs = [...tabbar.querySelectorAll(".tab")];
+  const panels = [...document.querySelectorAll(".panel")];
+  const tasks = document.getElementById("tasks");
+  const startMenu = document.getElementById("startmenu");
+
+  let active = "whoami";
+
+  function activate(id){
+    active = id;
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === id));
+    panels.forEach(p => p.classList.toggle("active", p.dataset.panel === id));
+    document.querySelectorAll(".taskitem").forEach(b => b.classList.toggle("active", b.dataset.id === id && !win.classList.contains("hidden")));
+    document.querySelectorAll(".icon").forEach(i => i.classList.toggle("sel", i.dataset.open === id));
+    if(id === "whoami" && window.__diagramFit) requestAnimationFrame(() => window.__diagramFit());
+  }
+  function showWindow(){ win.classList.remove("hidden"); syncTasks(); }
+  function openWidget(id){ showWindow(); activate(id); }
+
+  tabs.forEach(t => t.addEventListener("click", () => openWidget(t.dataset.tab)));
+  document.querySelectorAll("[data-open]").forEach(el =>
+    el.addEventListener("click", () => { openWidget(el.dataset.open); startMenu.classList.remove("open"); }));
+
+  // window controls
+  document.getElementById("btn-min").onclick = () => { win.classList.add("hidden"); syncTasks(); };
+  document.getElementById("btn-close").onclick = () => { win.classList.add("hidden"); syncTasks(); };
+  document.getElementById("btn-max").onclick = () => {
+    win.classList.toggle("max");
+    if(active === "whoami" && window.__diagramFit) requestAnimationFrame(() => window.__diagramFit());
+  };
+
+  // taskbar app buttons (one per widget window state — here a single window)
+  function syncTasks(){
+    tasks.innerHTML = "";
+    const b = document.createElement("button");
+    b.className = "taskitem" + (win.classList.contains("hidden") ? "" : " active");
+    b.dataset.id = active;
+    b.innerHTML = '<svg class="g" viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="11" rx="1.5" fill="#fff" opacity=".85"/><rect x="2.5" y="3.5" width="11" height="8" fill="#2a7de8"/></svg><span>M’s Life Dashboard</span>';
+    b.onclick = () => {
+      if(win.classList.contains("hidden")) showWindow();
+      else win.classList.add("hidden");
+      syncTasks();
+    };
+    tasks.appendChild(b);
+  }
+
+  // start menu
+  document.getElementById("start").onclick = (e) => { e.stopPropagation(); startMenu.classList.toggle("open"); };
+  document.addEventListener("click", (e) => {
+    if(!startMenu.contains(e.target) && e.target.id !== "start") startMenu.classList.remove("open");
+  });
+
+  // clock
+  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  function tick(){
+    const d = new Date();
+    let h = d.getHours(), m = d.getMinutes();
+    const ap = h >= 12 ? "PM" : "AM";
+    h = h % 12; if(h === 0) h = 12;
+    document.getElementById("clk-time").textContent = h + ":" + String(m).padStart(2,"0") + " " + ap;
+    document.getElementById("clk-date").textContent = DOW[d.getDay()] + ", " + MON[d.getMonth()] + " " + d.getDate();
+  }
+  tick(); setInterval(tick, 15000);
+
+  syncTasks();
+})();
+</script>
+
+<!-- =============== WIDGET 1: the good-life diagram (verbatim, IIFE-scoped) =============== -->
+<script>
+(function(){
 const SVGNS = "http://www.w3.org/2000/svg";
 
 /* ---------------- the page, reorganised ---------------- */
@@ -492,4 +831,222 @@ size(true);
 applyView();
 render();
 requestAnimationFrame(step);
+
+window.__diagramFit = () => size(false);
+})();
 </script>
+
+<!-- =============== WIDGET 2: the annual travel planner (ported to vanilla JS) =============== -->
+<script>
+(function(){
+  const CATEGORIES = [
+    { id:'capetown', label:'Cape Town', fill:'#D85A30', ink:'#4A1B0C' },
+    { id:'cyprus',   label:'Cyprus',    fill:'#1D9E75', ink:'#04342C' },
+    { id:'patmos',   label:'Patmos',    fill:'#7F77DD', ink:'#26215C' },
+    { id:'beirut',   label:'Beirut',    fill:'#C2364F', ink:'#3D0A19' },
+    { id:'ski',      label:'Ski',       fill:'#378ADD', ink:'#042C53' },
+    { id:'travel',   label:'Travel',    fill:'#EF9F27', ink:'#412402' },
+  ];
+  const CAT_BY_ID = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+  const WEEKS_PER_MONTH = [4,4,5,4,4,5,4,5,4,5,4,4];
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const TOTAL_WEEKS = 52;
+  const STORAGE_KEY = 'annual-planner-v4';
+  const PEAK_WEEKS = {
+    capetown: [[0,8],[49,52]],
+    cyprus:   [[26,35]],
+    patmos:   [[28,35]],
+    beirut:   [[26,35]],
+    ski:      [[51,52],[0,1],[6,9]],
+    travel:   [],
+  };
+  const isPeak = (catId, w) => (PEAK_WEEKS[catId] || []).some(([s,e]) => w >= s && w < e);
+
+  function defaultPlan(){
+    const p = Array(TOTAL_WEEKS).fill(null);
+    for(let i=0;  i<19; i++) p[i] = 'cyprus';
+    for(let i=19; i<21; i++) p[i] = 'patmos';
+    for(let i=21; i<44; i++) p[i] = 'capetown';
+    for(let i=44; i<52; i++) p[i] = 'cyprus';
+    return p;
+  }
+  function load(){
+    try{
+      const v = localStorage.getItem(STORAGE_KEY);
+      if(v){ const p = JSON.parse(v); if(Array.isArray(p) && p.length === TOTAL_WEEKS) return p; }
+    }catch(e){}
+    return null;
+  }
+  function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(plan)); }catch(e){} }
+
+  let plan = load() || defaultPlan();
+  let drag = null;
+
+  const gridCols = '128px repeat(52, minmax(7px, 1fr))';
+  const root = document.getElementById('planner-root');
+  const cells = {}; CATEGORIES.forEach(c => cells[c.id] = []);
+  const rowCountEl = {}, legendCountEl = {};
+  let assignedEl, unassignedEl;
+
+  function svgEgg(){ return '<svg width="9" height="12" viewBox="0 0 9 12"><ellipse cx="4.5" cy="7" rx="3.3" ry="4.3" fill="currentColor"/></svg>'; }
+  function svgTree(){ return '<svg width="12" height="13" viewBox="0 0 12 13"><path d="M6 1 L3.5 4.5 H4.8 L2.5 7.5 H4 L1.5 10.5 H10.5 L8 7.5 H9.5 L7.2 4.5 H8.5 L6 1 Z M5.3 10.5 H6.7 V12 H5.3 Z" fill="currentColor"/></svg>'; }
+
+  function build(){
+    // header
+    const head = document.createElement('div'); head.className = 'head';
+    head.innerHTML =
+      '<div>' +
+        '<div class="eyebrow">A year in three places</div>' +
+        '<h1>The year</h1>' +
+        '<p class="lede">Click or drag any row to paint weeks. Small dots mark peak tourist season. ' +
+        'Eggs show the Orthodox Easter window (April 4 to May 8), tree marks Christmas week. Changes save automatically.</p>' +
+      '</div>';
+    const btns = document.createElement('div'); btns.className = 'btns';
+    const bReset = document.createElement('button'); bReset.className = 'planner-btn'; bReset.textContent = 'Reset to plan';
+    const bClear = document.createElement('button'); bClear.className = 'planner-btn'; bClear.textContent = 'Clear all';
+    bReset.onclick = () => { plan = defaultPlan(); save(); refreshAll(); };
+    bClear.onclick = () => { plan = Array(TOTAL_WEEKS).fill(null); save(); refreshAll(); };
+    btns.appendChild(bReset); btns.appendChild(bClear);
+    head.appendChild(btns);
+    root.appendChild(head);
+
+    // card
+    const card = document.createElement('div'); card.className = 'card';
+    const inner = document.createElement('div'); inner.className = 'card-inner';
+
+    // month header
+    const months = document.createElement('div'); months.className = 'months';
+    months.style.gridTemplateColumns = gridCols;
+    months.appendChild(document.createElement('div'));
+    MONTH_NAMES.forEach((name, i) => {
+      const m = document.createElement('div');
+      m.className = 'month' + (i === 0 ? '' : ' divide');
+      m.style.gridColumn = 'span ' + WEEKS_PER_MONTH[i];
+      m.textContent = name;
+      months.appendChild(m);
+    });
+    inner.appendChild(months);
+
+    // feast row
+    const feast = document.createElement('div'); feast.className = 'feast';
+    feast.style.gridTemplateColumns = gridCols;
+    const fl = document.createElement('div'); fl.className = 'rlabel'; fl.textContent = 'feast days';
+    feast.appendChild(fl);
+    for(let i=0;i<TOTAL_WEEKS;i++){
+      const c = document.createElement('div'); c.className = 'feast-cell';
+      if(i >= 13 && i <= 18) c.innerHTML = svgEgg();
+      else if(i === 51) c.innerHTML = svgTree();
+      feast.appendChild(c);
+    }
+    inner.appendChild(feast);
+
+    // category rows
+    CATEGORIES.forEach(cat => {
+      const row = document.createElement('div'); row.className = 'catrow';
+      row.style.gridTemplateColumns = gridCols;
+      row.addEventListener('touchmove', (e) => handleTouchMove(e, cat.id), {passive:true});
+
+      const label = document.createElement('div'); label.className = 'catlabel'; label.style.color = cat.ink;
+      const sw = document.createElement('span'); sw.className = 'swatch'; sw.style.background = cat.fill;
+      const nm = document.createElement('span'); nm.className = 'catname'; nm.textContent = cat.label;
+      const cnt = document.createElement('span'); cnt.className = 'catcount';
+      rowCountEl[cat.id] = cnt;
+      label.appendChild(sw); label.appendChild(nm); label.appendChild(cnt);
+      row.appendChild(label);
+
+      for(let i=0;i<TOTAL_WEEKS;i++){
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.setAttribute('data-week', i);
+        cell.setAttribute('data-row', cat.id);
+        cell.addEventListener('mousedown', (e) => { e.preventDefault(); startAction(i, cat.id); });
+        cell.addEventListener('mouseenter', () => continueAction(i));
+        cell.addEventListener('touchstart', (e) => { e.preventDefault(); startAction(i, cat.id); }, {passive:false});
+        cells[cat.id][i] = cell;
+        row.appendChild(cell);
+      }
+      inner.appendChild(row);
+    });
+
+    card.appendChild(inner);
+    root.appendChild(card);
+
+    // footer
+    const foot = document.createElement('div'); foot.className = 'foot';
+    const asg = document.createElement('div'); asg.className = 'assigned';
+    assignedEl = document.createElement('span');
+    unassignedEl = document.createElement('span'); unassignedEl.className = 'unassigned';
+    asg.appendChild(assignedEl); asg.appendChild(unassignedEl);
+    foot.appendChild(asg);
+
+    const legend = document.createElement('div'); legend.className = 'legend';
+    CATEGORIES.forEach(c => {
+      const item = document.createElement('span'); item.className = 'item';
+      const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = c.fill;
+      const lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.style.color = c.ink; lbl.textContent = c.label;
+      const cnt = document.createElement('span'); cnt.className = 'cnt';
+      legendCountEl[c.id] = cnt;
+      item.appendChild(sw); item.appendChild(lbl); item.appendChild(cnt);
+      legend.appendChild(item);
+    });
+    foot.appendChild(legend);
+    root.appendChild(foot);
+
+    refreshAll();
+  }
+
+  function cellBg(catId, i){
+    const cat = CAT_BY_ID[catId];
+    const filled = plan[i] === catId;
+    const base = filled ? cat.fill : 'rgba(106, 93, 64, 0.08)';
+    return isPeak(catId, i)
+      ? 'radial-gradient(circle at center, ' + cat.ink + ' 0 1.8px, transparent 2.3px), ' + base
+      : base;
+  }
+  function refreshWeek(i){ CATEGORIES.forEach(c => { cells[c.id][i].style.background = cellBg(c.id, i); }); }
+  function refreshTotals(){
+    let assigned = 0;
+    CATEGORIES.forEach(c => {
+      const n = plan.filter(x => x === c.id).length;
+      assigned += n;
+      rowCountEl[c.id].textContent = n + 'w';
+      legendCountEl[c.id].textContent = n;
+    });
+    const unassigned = TOTAL_WEEKS - assigned;
+    assignedEl.innerHTML = assigned + ' <span class="dim">of 52 weeks planned</span>';
+    unassignedEl.textContent = unassigned > 0 ? ' · ' + unassigned + ' unassigned' : '';
+  }
+  function refreshAll(){ for(let i=0;i<TOTAL_WEEKS;i++) refreshWeek(i); refreshTotals(); }
+
+  function applyAction(weekIdx, mode, catId){
+    const cur = plan[weekIdx];
+    if(mode === 'erase'){ if(cur !== catId) return; plan[weekIdx] = null; }
+    else { if(cur === catId) return; plan[weekIdx] = catId; }
+    save(); refreshWeek(weekIdx); refreshTotals();
+  }
+  function startAction(weekIdx, rowCatId){
+    const mode = plan[weekIdx] === rowCatId ? 'erase' : 'paint';
+    drag = { mode, catId: rowCatId };
+    applyAction(weekIdx, mode, rowCatId);
+  }
+  function continueAction(weekIdx){ if(drag) applyAction(weekIdx, drag.mode, drag.catId); }
+  function handleTouchMove(e, rowCatId){
+    if(!drag) return;
+    const t = e.touches[0]; if(!t) return;
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if(!el) return;
+    const wi = el.getAttribute && el.getAttribute('data-week');
+    const rc = el.getAttribute && el.getAttribute('data-row');
+    if(wi !== null && rc === rowCatId) applyAction(Number(wi), drag.mode, drag.catId);
+  }
+
+  const end = () => { drag = null; };
+  window.addEventListener('mouseup', end);
+  window.addEventListener('touchend', end);
+  window.addEventListener('touchcancel', end);
+
+  build();
+})();
+</script>
+</body>
+</html>
