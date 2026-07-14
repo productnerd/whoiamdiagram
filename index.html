@@ -63,6 +63,16 @@
   .tab:hover{background:#e2ddca}
   .tab.active{background:#fbf9f1;color:#111;padding-bottom:7px;box-shadow:0 -1px 0 #fbf9f1}
 
+  /* shared toolbar + buttons (consistent across every tab) */
+  .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;
+    background:#ece9d8;border-bottom:1px solid #b9b49c}
+  .ui-btn{font-family:inherit;font-size:12px;font-weight:600;padding:5px 12px;color:#2f2f28;
+    border:1px solid #9a9784;border-radius:4px;cursor:pointer;background:linear-gradient(#ffffff,#e7e3d5)}
+  .ui-btn:hover{background:linear-gradient(#ffffff,#dbd6c4)}
+  .ui-btn:active{background:linear-gradient(#dbd6c4,#efece0)}
+  .ui-btn[aria-pressed="true"]{background:linear-gradient(#3d95ff,#0a56d0);border-color:#0847c9;
+    color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.3)}
+
   .winbody{flex:1;min-height:0;display:flex;background:#ece9d8}
   .panel{display:none;flex:1;min-height:0}
   .panel--fill.active{display:flex;flex-direction:column}
@@ -110,22 +120,7 @@
 
   /* ================= WIDGET 1: the diagram (scoped) ================= */
   .diagram-app{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;
-    background:var(--paper);color:var(--ink-deep);
-    font-family:"Inter","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
-  .diagram-app header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
-    padding:16px 24px 12px;border-bottom:1px solid var(--rule);z-index:3}
-  .diagram-app h1{margin:0;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-weight:400;font-size:20px}
-  .diagram-app h1 em{font-style:italic;color:var(--red)}
-  .diagram-app .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
-  .diagram-app .spacer{flex:1}
-  .diagram-app .controls{display:flex;gap:6px;flex-wrap:wrap}
-  .diagram-app .controls button{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-    padding:6px 11px;border:1px solid var(--rule);background:transparent;color:var(--graphite);
-    border-radius:999px;cursor:pointer;transition:.15s}
-  .diagram-app .controls button:hover{border-color:var(--graphite)}
-  .diagram-app .controls button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
-  .diagram-app .controls button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+    background:var(--paper);color:var(--ink-deep);-webkit-font-smoothing:antialiased}
   .diagram-app .stage{flex:1;position:relative;min-height:0}
   .diagram-app svg#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
   .diagram-app svg#map.dragging{cursor:grabbing}
@@ -138,10 +133,8 @@
     background:rgba(238,236,230,.95);border:1px solid var(--rule);padding:16px 18px 18px;
     opacity:0;transform:translateY(6px);transition:.18s;pointer-events:none}
   .diagram-app aside.on{opacity:1;transform:none;pointer-events:auto}
-  .diagram-app aside h2{margin:0 0 2px;font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-weight:400;font-size:19px}
-  .diagram-app aside .greek{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-style:italic;font-size:14px;color:var(--graphite);margin:0 0 8px}
+  .diagram-app aside h2{margin:0 0 2px;font-weight:700;font-size:16px}
+  .diagram-app aside .greek{font-style:italic;font-size:13px;color:var(--graphite);margin:0 0 8px}
   .diagram-app aside p.note{margin:0 0 10px;font-size:13px;line-height:1.5}
   .diagram-app aside h3{margin:12px 0 6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite)}
   .diagram-app aside ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:5px}
@@ -149,52 +142,32 @@
   .diagram-app aside li:hover{border-color:var(--ink);color:var(--ink)}
   .diagram-app aside li.cross{border-style:dashed}
   .diagram-app .close{position:absolute;top:8px;right:10px;border:0;background:transparent;padding:4px;font-size:14px;color:var(--graphite);cursor:pointer}
-  .diagram-app .hint{position:absolute;left:24px;bottom:22px;font-size:11px;color:var(--graphite-soft);
-    max-width:210px;line-height:1.7}
-  @media (max-width:640px){ .diagram-app header{padding:14px 16px 10px} .diagram-app .hint{display:none}
-    .diagram-app aside{right:12px;left:12px;bottom:12px;width:auto} }
+  @media (max-width:640px){ .diagram-app aside{right:12px;left:12px;bottom:12px;width:auto} }
 
   /* ================= WIDGET 2: the annual planner (scoped) ================= */
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=DM+Sans:wght@400;500&display=swap');
-  .planner-app{min-height:100%;background:#F4EEDD;padding:36px 24px 48px;color:#1F1C13;
-    font-family:"DM Sans",-apple-system,system-ui,sans-serif}
-  .planner-app .wrap{max-width:1040px;margin:0 auto}
-  .planner-app .head{display:flex;justify-content:space-between;align-items:flex-end;
-    margin-bottom:36px;flex-wrap:wrap;gap:16px}
-  .planner-app .eyebrow{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:13px;
-    letter-spacing:.08em;text-transform:uppercase;color:#8A7C55;margin-bottom:4px}
-  .planner-app h1{font-family:"Fraunces",Georgia,serif;font-size:52px;font-weight:400;font-style:italic;
-    margin:0;letter-spacing:-.02em;line-height:1;color:#1F1C13}
-  .planner-app .lede{margin:10px 0 0;font-size:14px;color:#6A5D40;max-width:500px;line-height:1.5}
-  .planner-app .btns{display:flex;gap:10px}
-  .planner-btn{font-family:inherit;font-size:13px;font-weight:500;padding:7px 14px;background:transparent;
-    border:1px solid #BFAE7F;color:#4A402A;border-radius:999px;cursor:pointer;letter-spacing:.01em;
-    transition:background 120ms,color 120ms}
-  .planner-btn:hover{background:#4A402A;color:#F4EEDD}
+  .planner-app{min-height:100%;background:#F4EEDD;color:#1F1C13}
+  .planner-app .wrap{max-width:1040px;margin:0 auto;padding:26px 24px 48px}
   .planner-app .card{background:#FBF6E8;border:1px solid #D3C6A0;border-radius:10px;
     padding:22px 20px 24px;user-select:none;overflow-x:auto}
   .planner-app .card-inner{min-width:720px}
   .planner-app .months,.planner-app .feast,.planner-app .catrow{display:grid;gap:2px}
-  .planner-app .months{margin-bottom:10px;font-family:"Fraunces",Georgia,serif;font-style:italic;
-    font-size:13px;color:#8A7C55}
+  .planner-app .months{margin-bottom:10px;font-size:12px;color:#8A7C55}
   .planner-app .month{text-align:center;padding:2px 2px 6px}
   .planner-app .month.divide{border-left:1px solid rgba(138,124,85,.18)}
   .planner-app .feast{margin-bottom:10px;align-items:center}
-  .planner-app .rlabel{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:12px;
-    color:#8A7C55;padding-right:14px;text-align:right}
+  .planner-app .rlabel{font-size:11px;color:#8A7C55;padding-right:14px;text-align:right}
   .planner-app .feast-cell{height:18px;display:flex;align-items:center;justify-content:center;color:#9B7A3A}
   .planner-app .catrow{margin-bottom:5px;align-items:center}
-  .planner-app .catlabel{display:flex;align-items:center;gap:10px;padding-right:14px;font-size:14px;font-weight:500}
+  .planner-app .catlabel{display:flex;align-items:center;gap:10px;padding-right:14px;font-size:13px;font-weight:600}
   .planner-app .swatch{width:11px;height:11px;border-radius:2px;flex-shrink:0}
   .planner-app .catname{flex:1}
-  .planner-app .catcount{font-family:"Fraunces",Georgia,serif;font-style:italic;
-    font-variant-numeric:tabular-nums;color:#8A7C55;font-weight:400;font-size:14px}
+  .planner-app .catcount{font-variant-numeric:tabular-nums;color:#8A7C55;font-weight:400;font-size:13px}
   .planner-app .cell{height:28px;border-radius:2px;cursor:pointer;transition:background 90ms,transform 120ms}
   .planner-app .cell:hover{transform:scaleY(1.15)}
   .planner-app .foot{margin-top:28px;display:flex;justify-content:space-between;align-items:baseline;
     flex-wrap:wrap;gap:12px;padding-top:20px;border-top:1px solid rgba(138,124,85,.25)}
-  .planner-app .assigned{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:20px;color:#4A402A}
-  .planner-app .assigned .dim{color:#8A7C55}
+  .planner-app .assigned{font-size:18px;font-weight:600;color:#4A402A}
+  .planner-app .assigned .dim{color:#8A7C55;font-weight:400}
   .planner-app .unassigned{font-size:14px;color:#B8A66D;margin-left:10px}
   .planner-app .legend{display:flex;gap:22px;font-size:13px;color:#6A5D40;flex-wrap:wrap}
   .planner-app .legend .item{display:inline-flex;align-items:center;gap:6px}
@@ -282,19 +255,13 @@
       <!-- WIDGET 1 -->
       <section class="panel panel--fill active" data-panel="whoami">
         <div class="diagram-app">
-          <header>
-            <h1>The <em>Good Life</em>, fair copy</h1>
-            <span class="sub">six branches</span>
-            <span class="spacer"></span>
-            <div class="controls">
-              <button id="cross" aria-pressed="true">cross-links</button>
-              <button id="collapse">collapse all</button>
-              <button id="reset">reset</button>
-            </div>
-          </header>
+          <div class="toolbar">
+            <button class="ui-btn" id="cross" aria-pressed="true">cross-links</button>
+            <button class="ui-btn" id="collapse">collapse all</button>
+            <button class="ui-btn" id="reset">reset</button>
+          </div>
           <div class="stage">
             <svg id="map"></svg>
-            <div class="hint">Click a branch to fold or unfold it. Click any node to trace what it touches. Drag to move, scroll to zoom.</div>
             <aside id="panel">
               <button class="close" id="close" aria-label="Close">✕</button>
               <h2 id="p-title"></h2>
@@ -308,7 +275,10 @@
 
       <!-- WIDGET 2 -->
       <section class="panel panel--scroll" data-panel="theyear">
-        <div class="planner-app"><div class="wrap" id="planner-root"></div></div>
+        <div class="planner-app">
+          <div class="toolbar" id="planner-bar"></div>
+          <div class="wrap" id="planner-root"></div>
+        </div>
       </section>
     </div>
   </div>
@@ -566,9 +536,7 @@ nodes.forEach(n => {
   t.setAttribute("text-anchor","middle");
   t.setAttribute("fill", ink);
   t.setAttribute("font-size", size);
-  t.setAttribute("font-family", (n.kind !== "leaf" || n.greek)
-    ? '"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif'
-    : '"Inter","Helvetica Neue",Arial,sans-serif');
+  t.setAttribute("font-family", 'Tahoma, "Segoe UI", Verdana, sans-serif');
   if(n.greek) t.setAttribute("font-style","italic");
   t.setAttribute("letter-spacing", n.kind === "hub" ? "1.6" : n.kind === "core" ? "0.8" : "0");
   lines.forEach((ln,i) => {
@@ -892,23 +860,13 @@ window.__diagramFit = () => size(false);
   function svgTree(){ return '<svg width="12" height="13" viewBox="0 0 12 13"><path d="M6 1 L3.5 4.5 H4.8 L2.5 7.5 H4 L1.5 10.5 H10.5 L8 7.5 H9.5 L7.2 4.5 H8.5 L6 1 Z M5.3 10.5 H6.7 V12 H5.3 Z" fill="currentColor"/></svg>'; }
 
   function build(){
-    // header
-    const head = document.createElement('div'); head.className = 'head';
-    head.innerHTML =
-      '<div>' +
-        '<div class="eyebrow">A year in three places</div>' +
-        '<h1>The year</h1>' +
-        '<p class="lede">Click or drag any row to paint weeks. Small dots mark peak tourist season. ' +
-        'Eggs show the Orthodox Easter window (April 4 to May 8), tree marks Christmas week. Changes save automatically.</p>' +
-      '</div>';
-    const btns = document.createElement('div'); btns.className = 'btns';
-    const bReset = document.createElement('button'); bReset.className = 'planner-btn'; bReset.textContent = 'Reset to plan';
-    const bClear = document.createElement('button'); bClear.className = 'planner-btn'; bClear.textContent = 'Clear all';
+    // toolbar (matches the shared format used on every tab)
+    const bar = document.getElementById('planner-bar');
+    const bReset = document.createElement('button'); bReset.className = 'ui-btn'; bReset.textContent = 'Reset to plan';
+    const bClear = document.createElement('button'); bClear.className = 'ui-btn'; bClear.textContent = 'Clear all';
     bReset.onclick = () => { plan = defaultPlan(); save(); refreshAll(); };
     bClear.onclick = () => { plan = Array(TOTAL_WEEKS).fill(null); save(); refreshAll(); };
-    btns.appendChild(bReset); btns.appendChild(bClear);
-    head.appendChild(btns);
-    root.appendChild(head);
+    bar.appendChild(bReset); bar.appendChild(bClear);
 
     // card
     const card = document.createElement('div'); card.className = 'card';
